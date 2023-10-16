@@ -61,15 +61,16 @@ def save_to_docx(text, images, filename):
     column_width = Inches(3) 
     
     # Iterating through the processed text and inserting images at their respective placeholders
-    for line in text.splitlines():
-        if "[[IMAGE:" in line:
-            img_path = line.split('[[IMAGE:')[1].split(']]')[0]
+    segments = re.split(r'(\[\[IMAGE:[^\]]+\]\])', text)
+    for segment in segments:
+        if "[[IMAGE:" in segment:
+            img_path = segment.split('[[IMAGE:')[1].split(']]')[0]
             doc.add_picture(img_path, width=column_width)
         else:
-            line = line.replace("Questão ", "\nQuestão ")
-            paragraph = doc.add_paragraph(line)
-            paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
-            paragraph.paragraph_format.space_after = Inches(0)  # Remove spacing after paragraph
+            if segment.strip():  # Check if segment is not just whitespace
+                segment = segment.replace("Questão ", "\nQuestão ")
+                paragraph = doc.add_paragraph(segment)
+                paragraph.alignment = WD_PARAGRAPH_ALIGNMENT.JUSTIFY
 
     doc.save(filename)
 
